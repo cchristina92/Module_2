@@ -1,0 +1,102 @@
+Sub YearlyStockData()
+    
+    Dim ws As Worksheet
+    Dim LastRowA As Long
+    Dim LastRowJ As Long
+    Dim Ticker As Long
+    Dim WorksheetYr As String
+    Dim YearlyChange As Double
+    Dim PercentChange As Double
+    Dim TotalVol As Double
+    Dim GrtIncr As Double 'Greatest Percent Increase'
+    Dim GrtDecr As Double 'Greatest Percent Decrease'
+    Dim GrtTolVol As Double 'Greatest Total Volume'
+        
+    For Each ws In Worksheets
+        WorksheetYr = ws.Name
+        
+        'Label columns'
+        ws.Cells(1, 10).Value = "Ticker"
+        ws.Cells(1, 11).Value = "Yearly Change"
+        ws.Cells(1, 12).Value = "Percent Change"
+        ws.Cells(1, 13).Value = "Total Stock Valume"
+        ws.Cells(1, 17).Value = "Ticker"
+        ws.Cells(1, 18).Value = "Value"
+        ws.Cells(2, 16).Value = "Greatest % Increase"
+        ws.Cells(3, 16).Value = "Greatest % Decrease"
+        ws.Cells(4, 16).Value = "Greatest Total Volume"
+        
+        Ticker = 2
+        LastRowA = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        Dim j As Long
+        j = 2
+        
+        For i = 2 To LastRowA 'Loop through rows'
+            
+            If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+                ws.Cells(Ticker, 10).Value = ws.Cells(i, 1).Value
+                ws.Cells(Ticker, 11).Value = ws.Cells(i, 6).Value - ws.Cells(j, 3).Value
+                
+                If ws.Cells(Ticker, 11).Value < 0 Then
+                    ws.Cells(Ticker, 11).Interior.ColorIndex = 3 'Red Color'
+                Else
+                    ws.Cells(Ticker, 11).Interior.ColorIndex = 4 'Green Color'
+                End If
+                    
+                If ws.Cells(j, 3).Value <> 0 Then
+                    PercentChange = ((ws.Cells(i, 6).Value - ws.Cells(j, 3).Value) / ws.Cells(j, 3).Value)
+                    ws.Cells(Ticker, 12).Value = Format(PercentChange, "Percent")
+                Else
+                    ws.Cells(Ticker, 12).Value = Format(0, "Percent")
+                End If
+                    
+                ws.Cells(Ticker, 13).Value = WorksheetFunction.Sum(ws.Range(ws.Cells(j, 7), ws.Cells(i, 7)))
+                Ticker = Ticker + 1
+                j = i + 1
+            End If
+            
+        Next i
+            
+        LastRowJ = ws.Cells(Rows.Count, 10).End(xlUp).Row
+        
+        GrtIncr = ws.Cells(2, 12).Value
+        GrtDecr = ws.Cells(2, 12).Value
+        GrtTolVol = ws.Cells(2, 13).Value
+        
+        For i = 2 To LastRowJ
+                
+            If ws.Cells(i, 12).Value > GrtIncr Then
+                GrtIncr = ws.Cells(i, 12).Value
+                ws.Cells(2, 17).Value = ws.Cells(i, 10).Value
+            Else
+                GrtIncr = GrtIncr
+            End If
+            
+            If ws.Cells(i, 12).Value > GrtDecr Then
+                GrtDecr = ws.Cells(i, 12).Value
+                ws.Cells(3, 17).Value = ws.Cells(i, 10).Value
+            Else
+                GrtDecr = GrtDecr
+            End If
+                
+            If ws.Cells(i, 13).Value > GrtTolVol Then
+                GrtTolVol = ws.Cells(i, 13).Value
+                ws.Cells(4, 17).Value = ws.Cells(i, 10).Value
+            Else
+                GrtTolVol = GrtTolVol
+            End If
+                
+        ws.Cells(2, 18).Value = Format(GrtIncr, "Percent")
+        ws.Cells(3, 18).Value = Format(GrtDecr, "Percent")
+        ws.Cells(4, 18).Value = Format(GrtTolVol, "Scientific")
+            
+        Next i
+            
+        Worksheets(WorksheetYr).Columns("A:Z").AutoFit
+    
+    Next ws
+                            
+            
+        
+End Sub
+
